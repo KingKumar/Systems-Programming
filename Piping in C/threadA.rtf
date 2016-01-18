@@ -1,0 +1,118 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1138\cocoasubrtf510
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f0\fs24 \cf0 /*\'a0gcc class.example.c\'a0\uc0\u8208 o xx \u8208 lpthread \u8208 lrt*/\
+\'a0\'a0\'a0\'a0\'a0#define\'a0_REENTRANT\'a0\'a0\'a0\'a0/*\'a0basic\'a02\uc0\u8208 lines\'a0for\'a0pthreads\'a0*/\
+\'a0\'a0\'a0\'a0\'a0#include\'a0<pthread.h>\
+\'a0\'a0\'a0\'a0\'a0#include\'a0<semaphore.h>\'a0\'a0/*\'a0basic\'a0line\'a0for\'a0pthread\'a0semaphores\'a0*/\
+\'a0\'a0\'a0\'a0\'a0#include\'a0<stdlib.h>\
+\'a0\'a0\'a0\'a0\'a0#include\'a0<stdio.h>\
+\'a0\'a0\'a0\'a0\'a0#define\'a0NUM_THREADS\'a03\
+\'a0\'a0\'a0\'a0\'a0\
+\'a0\'a0\'a0\'a0\'a0void\'a0*threadA\'a0(void\'a0*);\'a0\'a0\'a0/*\'a0thread\'a0routines\'a0*/\
+\'a0\'a0\'a0\'a0\'a0void\'a0*threadB\'a0(void *);\
+\'a0\'a0\'a0\'a0\'a0void\'a0*threadC\'a0(void *);\
+\'a0\'a0\'a0\'a0\'a0pthread_t\'a0tid[NUM_THREADS];\'a0\'a0\'a0\'a0\'a0\'a0/*\'a0array\'a0of\'a0thread\'a0IDs\'a0*/\
+\'a0\'a0\'a0\'a0\'a0sem_t\'a0emptyA, emptyB;\
+	 sem_t fullA, fullB;\
+\'a0\'a0\'a0\'a0\'a0int\'a0in, outA, outB;\'a0/*\'a0Shared\'a0variable\'a0*/\
+\
+	 struct element1 \{int x; char y[2];\};\
+	 struct element2 \{int x; char y[3];\};\
+\
+	 /* Shared arrays of structs */\
+	 struct element1 bufferX[25];\
+	 struct element2 bufferY[45];\
+\'a0\'a0\'a0\'a0\'a0\
+\'a0\'a0\'a0\'a0\'a0int\'a0main(int\'a0argc,\'a0char\'a0*argv[])\
+\'a0\'a0\'a0\'a0\'a0\{\
+	\'a0\'a0\'a0\'a0int\'a0i;\
+	\'a0\'a0\'a0\'a0int\'a0sizeX\'a0=25;\
+		int sizeY =45;\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	\'a0\'a0\'a0\'a0\'a0\'a0\'a0\
+	\'a0\'a0\'a0\'a0i\'a0=\'a0sem_init(&emptyA,\'a00, sizeX);\
+		i\'a0=\'a0sem_init(&emptyB,\'a00,\'a0sizeY);\
+		i\'a0=\'a0sem_init(&fullA,\'a00,\'a00);\
+		i\'a0=\'a0sem_init(&fullB,\'a00,\'a00);\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\
+	\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\
+	\'a0\'a0\'a0\'a0i\'a0=\'a0pthread_create(&tid[0],\'a0NULL, threadA,\'a0NULL);\
+		if (i<0) \{ printf("Thread\'a0No. %d: Creation of thread with tid0 = %d failed. Terminating.\\n", pthread_self(), tid[0]); exit(0);\}\
+	\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\
+	\'a0\'a0\'a0\'a0i\'a0=\'a0pthread_create(&tid[1],\'a0NULL,\'a0threadB,\'a0NULL);\'a0\
+		if (i<0) \{ printf("Thread\'a0No. %d: Creation of thread with tid1 = %d failed. Terminating.\\n", pthread_self(), tid[1]); exit(0); \}\
+	\'a0\'a0\'a0\'a0\'a0\
+	\'a0\'a0\'a0\'a0i\'a0=\'a0pthread_create(&tid[2],\'a0NULL,\'a0threadC,\'a0NULL);\
+		if (i<0) \{ printf("Thread\'a0No. %d: Creation of thread with tid2 = %d failed. Terminating.\\n", pthread_self(), tid[2]); exit(0);\}\
+	\'a0\'a0\'a0\'a0\
+		printf("\\nmain()\'a0Thread\'a0No. %d:\'a0created\'a0three\'a0threads\'a0tid0\'a0=\'a0%d,\'a0tid1= %d,\'a0tid2=\'a0%d\\n",\'a0\
+	\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0pthread_self(),\'a0tid[0],\'a0tid[1],\'a0tid[2]);\
+	\'a0\'a0\'a0\'a0\
+	\'a0\'a0\'a0\'a0\'a0\
+	\'a0\'a0\'a0\'a0for\'a0(i\'a0=\'a00;i\'a0<\'a0NUM_THREADS;\'a0i++)\'a0pthread_join(tid[i],NULL)\'a0==\'a00;\
+	\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\
+	\'a0\'a0\'a0\'a0printf("\\nmain()\'a0Thread\'a0No.%d:\'a0All\'a0threads\'a0done.",\'a0pthread_self());\
+	\'a0\'a0\'a0\'a0pthread_exit(NULL);\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\
+\'a0\'a0\'a0\'a0\'a0\}\'a0/*\'a0end\'a0main\'a0*/\
+\'a0\
+\'a0\'a0\'a0\'a0\'a0void\'a0* threadA(void\'a0*arg)\
+\'a0\'a0\'a0\'a0\'a0\{\'a0\'a0\'a0\
+		in = 0;\
+		int count = 1;\
+		struct element1 bufItem;\
+		while (count < 1000) \
+		\{\
+			bufItem.x = in + 1;\
+			bufItem.y = "xx";\
+			sem_wait(&emptyA);\
+			bufferX[in] = bufItem;\
+			in = (in + 1) % 25;\
+			sem_post(&fullA);\
+		\}\
+		pthread_exit(NULL);\
+\'a0\'a0\'a0\'a0\'a0\}\
+\
+	void\'a0* threadB(void *arg)\
+\'a0\'a0\'a0\'a0\'a0\{\'a0\'a0\'a0 \'a0\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0in = 0;\
+		int count = 1;\
+		struct element2 bufItem;\
+		while (count < 1000) \
+		\{\
+			bufItem.x = in + 1;\
+			bufItem.y = "YYY";\
+			sem_wait(&emptyB);\
+			bufferX[in] = bufItem;\
+			in = (in + 1) % 45;\
+			sem_post(&fullB);\
+		\}\
+		pthread_exit(NULL);\
+\'a0\'a0\'a0\'a0\'a0\}\
+\'a0\'a0\'a0\'a0\
+	void\'a0* threadC(void\'a0*arg)\
+\'a0\'a0\'a0\'a0\'a0\{\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0outA = 0;\
+		outB = 0;\
+		int count = 1;\
+		struct element1 bufItemX;\
+		struct element2 bufItemY;\
+		while (count < 1000) \
+		\{\
+			sem_wait(fullA);\
+			bufItemX = bufferX[outA];\
+			sem_post(emptyA);\
+			printf("%d%s ", bufItemX.x, bufItemX.y);\
+\
+			sem_wait(fullB);\
+			bufItemY = bufferY[outB];\
+			sem_post(emptyB);\
+			printf("%s%d ", bufItemY.y, bufItemY.x);\
+\
+			outA = (outA + 1) % 25;\
+			outB = (outB + 1) % 45;\
+		\}\
+		pthread_exit(NULL);\
+\'a0\'a0\'a0\'a0\'a0\}}
